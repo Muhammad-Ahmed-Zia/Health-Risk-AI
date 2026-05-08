@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Health Assessment Form — HealthRisk AI</title>
+<meta name="description" content="Fill in your health and lifestyle information to receive your AI-powered personalised health risk assessment."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050d1a;
+  --surface:#0b1628;
+  --surface2:#111f36;
+  --border:rgba(99,179,237,.12);
+  --border-input:rgba(99,179,237,.2);
+  --teal:#00d4aa;
+  --teal-dim:#00a884;
+  --teal-glow:rgba(0,212,170,.12);
+  --blue:#3b82f6;
+  --red:#f43f5e;
+  --yellow:#fbbf24;
+  --white:#ffffff;
+  --gray:#8b99b0;
+  --font:'Inter',-apple-system,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--white);min-height:100vh}
+
+/* ── Nav ── */
+nav{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:66px;
+  background:rgba(5,13,26,.9);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1rem;letter-spacing:-.02em;text-decoration:none;color:inherit}
+.brand-dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:pdot 2.5s infinite}
+@keyframes pdot{0%,100%{box-shadow:0 0 6px var(--teal)}50%{box-shadow:0 0 18px var(--teal)}}
+.nav-back{
+  background:transparent;color:var(--gray);font-weight:600;font-size:.875rem;
+  padding:.5rem 1rem;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;
+  font-family:var(--font);transition:all .2s;display:flex;align-items:center;gap:.4rem;
+}
+.nav-back:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ── Progress bar ── */
+.progress-bar{height:3px;background:var(--surface2);position:relative;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--teal),var(--blue));transition:width .5s ease;border-radius:0 3px 3px 0}
+
+/* ── Layout ── */
+.page-wrap{max-width:860px;margin:0 auto;padding:3rem 1.5rem 5rem}
+.form-header{text-align:center;margin-bottom:3rem}
+.step-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:var(--teal-glow);border:1px solid rgba(0,212,170,.2);
+  color:var(--teal);padding:.3rem .9rem;border-radius:50px;
+  font-size:.73rem;letter-spacing:.1em;font-weight:700;text-transform:uppercase;margin-bottom:1rem;
+}
+.form-header h1{font-size:2.3rem;font-weight:800;letter-spacing:-.04em;margin-bottom:.6rem}
+.form-header p{color:var(--gray);font-size:.95rem;max-width:480px;margin:0 auto}
+
+/* ── Card ── */
+.form-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:2.5rem;margin-bottom:1.5rem;
+}
+.section-head{
+  display:flex;align-items:center;gap:.75rem;margin-bottom:1.75rem;
+}
+.sh-icon{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--teal-glow);border:1px solid rgba(0,212,170,.2);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;
+}
+.sh-text{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:700}
+.sh-line{flex:1;height:1px;background:var(--surface2)}
+
+/* ── Form rows ── */
+.row{display:grid;gap:1.25rem;margin-bottom:1.25rem}
+.row.c2{grid-template-columns:1fr 1fr}
+.row.c3{grid-template-columns:1fr 1fr 1fr}
+
+/* ── Fields ── */
+.field{display:flex;flex-direction:column;gap:.45rem}
+.field label{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.8)}
+.req{color:var(--red);margin-left:.1rem}
+.field input,.field select{
+  background:var(--surface2);
+  border:1.5px solid var(--border-input);
+  border-radius:10px;padding:.75rem 1rem;
+  font-size:.95rem;font-family:var(--font);color:var(--white);outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.field input::placeholder{color:#3d5070}
+.field select option{background:#111f36;color:var(--white)}
+.field input:focus,.field select:focus{
+  border-color:var(--teal);
+  box-shadow:0 0 0 3px rgba(0,212,170,.12);
+}
+.hint{font-size:.75rem;color:var(--gray)}
+.error-msg{font-size:.75rem;color:var(--red);display:none}
+.field.has-error input,.field.has-error select{border-color:var(--red)}
+.field.has-error .error-msg{display:block}
+
+/* ── BMI preview ── */
+.bmi-box{
+  background:var(--surface2);border:1.5px dashed rgba(0,212,170,.2);
+  border-radius:10px;padding:.8rem 1.1rem;font-size:.95rem;color:var(--gray);
+}
+.bmi-box strong{color:var(--teal);font-size:1.1rem}
+
+/* ── Toggle buttons ── */
+.toggle-group{display:flex;gap:.5rem;flex-wrap:wrap}
+.tog{
+  flex:1;padding:.65rem .75rem;border-radius:9px;
+  border:1.5px solid var(--border-input);
+  background:var(--surface2);cursor:pointer;
+  font-size:.85rem;font-family:var(--font);color:var(--gray);
+  font-weight:600;transition:all .18s;text-align:center;min-width:60px;
+}
+.tog.active{
+  background:var(--teal);border-color:var(--teal);color:#050d1a;
+}
+.tog:hover:not(.active){border-color:var(--teal);color:var(--teal)}
+
+/* ── Submit ── */
+.submit-wrap{text-align:center;padding-top:1.5rem}
+.submit-btn{
+  background:linear-gradient(135deg,var(--teal),var(--teal-dim));
+  color:#050d1a;font-weight:800;font-size:1.05rem;
+  padding:1rem 3rem;border-radius:14px;border:none;cursor:pointer;
+  font-family:var(--font);display:inline-flex;align-items:center;gap:.7rem;
+  transition:all .25s;letter-spacing:-.01em;
+}
+.submit-btn:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,212,170,.35)}
+.submit-btn:disabled{opacity:.55;pointer-events:none}
+.spinner{
+  width:20px;height:20px;border:2.5px solid rgba(5,13,26,.3);
+  border-top-color:#050d1a;border-radius:50%;animation:spin .7s linear infinite;display:none
+}
+.submit-btn.loading .spinner{display:block}
+.submit-btn.loading .btn-text{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Alert ── */
+.alert{
+  background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);
+  color:#fca5a5;border-radius:10px;padding:.9rem 1.1rem;font-size:.87rem;
+  margin-bottom:1rem;display:none;
+}
+
+@media(max-width:640px){.row.c2,.row.c3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="/">
+    <div class="brand-dot"></div>
+    HealthRisk AI
+  </a>
+  <button class="nav-back" onclick="history.back()">← Back</button>
+</nav>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="page-wrap">
+  <div class="form-header">
+    <div class="step-badge">📋 Step 1 of 1</div>
+    <h1>Health Assessment Form</h1>
+    <p>Fill in all fields accurately — your information is only used to generate your personalised health risk report.</p>
+  </div>
+
+  <div class="alert" id="alertBox"></div>
+
+  <!-- Personal -->
+  <div class="form-card">
+    <div class="section-head">
+      <div class="sh-icon">👤</div>
+      <div class="sh-text">Personal Identification</div>
+      <div class="sh-line"></div>
+    </div>
+    <div class="row c2">
+      <div class="field" id="f-first_name">
+        <label>First Name <span class="req">*</span></label>
+        <input type="text" id="first_name" placeholder="e.g. Sarah" autocomplete="given-name"/>
+        <span class="error-msg">First name is required</span>
+      </div>
+      <div class="field" id="f-last_name">
+        <label>Last Name <span class="req">*</span></label>
+        <input type="text" id="last_name" placeholder="e.g. Mitchell" autocomplete="family-name"/>
+        <span class="error-msg">Last name is required</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Physical -->
+  <div class="form-card">
+    <div class="section-head">
+      <div class="sh-icon">⚖️</div>
+      <div class="sh-text">Physical Metrics</div>
+      <div class="sh-line"></div>
+    </div>
+    <div class="row c3">
+      <div class="field" id="f-age">
+        <label>Age <span class="req">*</span></label>
+        <input type="number" id="age" placeholder="e.g. 35" min="18" max="120"/>
+        <span class="hint">18 – 120 years</span>
+        <span class="error-msg">Valid age required (18–120)</span>
+      </div>
+      <div class="field" id="f-weight">
+        <label>Weight (kg) <span class="req">*</span></label>
+        <input type="number" id="weight" placeholder="e.g. 72" min="20" max="300" step="0.1"/>
+        <span class="hint">20 – 300 kg</span>
+        <span class="error-msg">Valid weight required (20–300)</span>
+      </div>
+      <div class="field" id="f-height">
+        <label>Height (cm) <span class="req">*</span></label>
+        <input type="number" id="height" placeholder="e.g. 170" min="50" max="250" step="0.1"/>
+        <span class="hint">50 – 250 cm</span>
+        <span class="error-msg">Valid height required (50–250)</span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Calculated BMI</label>
+        <div class="bmi-box" id="bmiPreview">— Enter weight &amp; height to auto-calculate</div>
+        <span class="hint">Auto-calculated from your measurements</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lifestyle -->
+  <div class="form-card">
+    <div class="section-head">
+      <div class="sh-icon">🏃</div>
+      <div class="sh-text">Lifestyle Factors</div>
+      <div class="sh-line"></div>
+    </div>
+    <div class="row c2">
+      <div class="field" id="f-sleep">
+        <label>Sleep Duration <span class="req">*</span></label>
+        <input type="number" id="sleep" placeholder="e.g. 7.5" min="1" max="24" step="0.5"/>
+        <span class="hint">Hours per night (1 – 24)</span>
+        <span class="error-msg">Valid sleep hours required (1–24)</span>
+      </div>
+      <div class="field" id="f-profession">
+        <label>Profession <span class="req">*</span></label>
+        <select id="profession">
+          <option value="">— Select your profession</option>
+          <option value="artist">Artist</option>
+          <option value="doctor">Doctor</option>
+          <option value="driver">Driver</option>
+          <option value="engineer">Engineer</option>
+          <option value="farmer">Farmer</option>
+          <option value="office_worker">Office Worker</option>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+        </select>
+        <span class="error-msg">Please select your profession</span>
+      </div>
+    </div>
+    <div class="row c2">
+      <div class="field" id="f-exercise">
+        <label>Exercise Level <span class="req">*</span></label>
+        <div class="toggle-group">
+          <button class="tog" data-field="exercise" data-val="none" onclick="selTog(this)">None</button>
+          <button class="tog" data-field="exercise" data-val="low" onclick="selTog(this)">Low</button>
+          <button class="tog" data-field="exercise" data-val="medium" onclick="selTog(this)">Medium</button>
+          <button class="tog" data-field="exercise" data-val="high" onclick="selTog(this)">High</button>
+        </div>
+        <input type="hidden" id="exercise"/>
+        <span class="error-msg" id="e-exercise">Please select exercise level</span>
+      </div>
+      <div class="field" id="f-sugar_intake">
+        <label>Sugar Intake <span class="req">*</span></label>
+        <div class="toggle-group">
+          <button class="tog" data-field="sugar_intake" data-val="low" onclick="selTog(this)">Low</button>
+          <button class="tog" data-field="sugar_intake" data-val="medium" onclick="selTog(this)">Medium</button>
+          <button class="tog" data-field="sugar_intake" data-val="high" onclick="selTog(this)">High</button>
+        </div>
+        <input type="hidden" id="sugar_intake"/>
+        <span class="error-msg" id="e-sugar_intake">Please select sugar intake</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Habits -->
+  <div class="form-card">
+    <div class="section-head">
+      <div class="sh-icon">💊</div>
+      <div class="sh-text">Health Habits &amp; Status</div>
+      <div class="sh-line"></div>
+    </div>
+    <div class="row c3">
+      <div class="field" id="f-smoking">
+        <label>Smoking <span class="req">*</span></label>
+        <div class="toggle-group">
+          <button class="tog" data-field="smoking" data-val="yes" onclick="selTog(this)">Yes</button>
+          <button class="tog" data-field="smoking" data-val="no" onclick="selTog(this)">No</button>
+        </div>
+        <input type="hidden" id="smoking"/>
+        <span class="error-msg" id="e-smoking">Please select</span>
+      </div>
+      <div class="field" id="f-alcohol">
+        <label>Alcohol Use <span class="req">*</span></label>
+        <div class="toggle-group">
+          <button class="tog" data-field="alcohol" data-val="yes" onclick="selTog(this)">Yes</button>
+          <button class="tog" data-field="alcohol" data-val="no" onclick="selTog(this)">No</button>
+        </div>
+        <input type="hidden" id="alcohol"/>
+        <span class="error-msg" id="e-alcohol">Please select</span>
+      </div>
+      <div class="field" id="f-married">
+        <label>Marital Status <span class="req">*</span></label>
+        <div class="toggle-group">
+          <button class="tog" data-field="married" data-val="yes" onclick="selTog(this)">Married</button>
+          <button class="tog" data-field="married" data-val="no" onclick="selTog(this)">Single</button>
+        </div>
+        <input type="hidden" id="married"/>
+        <span class="error-msg" id="e-married">Please select</span>
+      </div>
+    </div>
+    <div class="submit-wrap">
+      <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+        <div class="spinner"></div>
+        <span class="btn-text">Generate My Health Report →</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── BMI ──────────────────────────────────────────────────────────────────
+function updateBMI(){
+  const w=parseFloat(document.getElementById('weight').value);
+  const h=parseFloat(document.getElementById('height').value);
+  const el=document.getElementById('bmiPreview');
+  if(w>0&&h>0){
+    const bmi=(w/((h/100)**2)).toFixed(1);
+    let cat='';
+    if(bmi<18.5)cat='Underweight';
+    else if(bmi<25)cat='Normal weight';
+    else if(bmi<30)cat='Overweight';
+    else cat='Obese';
+    el.innerHTML=`<strong>${bmi}</strong> — ${cat}`;
+  }else{
+    el.innerHTML='— Enter weight &amp; height to auto-calculate';
+  }
+}
+document.getElementById('weight').addEventListener('input',updateBMI);
+document.getElementById('height').addEventListener('input',updateBMI);
+
+// ── Progress ─────────────────────────────────────────────────────────────
+const allFields=['first_name','last_name','age','weight','height','sleep','profession','exercise','sugar_intake','smoking','alcohol','married'];
+function updateProgress(){
+  let filled=0;
+  allFields.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&el.value.trim()!=='')filled++;
+  });
+  document.getElementById('progressFill').style.width=(filled/allFields.length*100)+'%';
+}
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',updateProgress));
+
+// ── Toggles ──────────────────────────────────────────────────────────────
+function selTog(btn){
+  const field=btn.dataset.field;
+  document.querySelectorAll(`.tog[data-field="${field}"]`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(field).value=btn.dataset.val;
+  const fw=document.getElementById('f-'+field);
+  if(fw)fw.classList.remove('has-error');
+  updateProgress();
+}
+
+// ── Validation ────────────────────────────────────────────────────────────
+function vField(id,check){
+  const wrap=document.getElementById('f-'+id);
+  const ok=check();
+  if(wrap)wrap.classList.toggle('has-error',!ok);
+  return ok;
+}
+function validate(){
+  let ok=true;
+  if(!vField('first_name',()=>document.getElementById('first_name').value.trim().length>0))ok=false;
+  if(!vField('last_name',()=>document.getElementById('last_name').value.trim().length>0))ok=false;
+  const age=+document.getElementById('age').value;
+  if(!vField('age',()=>age>=18&&age<=120))ok=false;
+  const w=+document.getElementById('weight').value;
+  if(!vField('weight',()=>w>=20&&w<=300))ok=false;
+  const h=+document.getElementById('height').value;
+  if(!vField('height',()=>h>=50&&h<=250))ok=false;
+  const sl=+document.getElementById('sleep').value;
+  if(!vField('sleep',()=>sl>=1&&sl<=24))ok=false;
+  if(!vField('profession',()=>document.getElementById('profession').value!==''))ok=false;
+  ['exercise','sugar_intake','smoking','alcohol','married'].forEach(id=>{
+    const v=document.getElementById(id).value;
+    const fw=document.getElementById('f-'+id);
+    if(!v){if(fw)fw.classList.add('has-error');ok=false;}
+    else{if(fw)fw.classList.remove('has-error');}
+  });
+  return ok;
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────
+async function submitForm(){
+  document.getElementById('alertBox').style.display='none';
+  if(!validate()){
+    const al=document.getElementById('alertBox');
+    al.textContent='⚠ Please fill in all required fields correctly.';
+    al.style.display='block';
+    al.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  const btn=document.getElementById('submitBtn');
+  btn.classList.add('loading');btn.disabled=true;
+  const payload={
+    first_name:document.getElementById('first_name').value.trim(),
+    last_name:document.getElementById('last_name').value.trim(),
+    age:document.getElementById('age').value,
+    weight:document.getElementById('weight').value,
+    height:document.getElementById('height').value,
+    sleep:document.getElementById('sleep').value,
+    exercise:document.getElementById('exercise').value,
+    sugar_intake:document.getElementById('sugar_intake').value,
+    smoking:document.getElementById('smoking').value,
+    alcohol:document.getElementById('alcohol').value,
+    married:document.getElementById('married').value,
+    profession:document.getElementById('profession').value,
+  };
+  try{
+    const res=await fetch('/api/predict',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Server error');
+    sessionStorage.setItem('hrp_result',JSON.stringify(data));
+    window.location.href='/result';
+  }catch(e){
+    const al=document.getElementById('alertBox');
+    al.textContent='Error: '+e.message;
+    al.style.display='block';
+    btn.classList.remove('loading');btn.disabled=false;
+  }
+}
+</script>
+</body>
+</html>

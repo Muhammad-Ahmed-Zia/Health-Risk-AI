@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Your Health Risk Report — HealthRisk AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050d1a;--surface:#0b1628;--surface2:#111f36;
+  --border:rgba(99,179,237,.12);
+  --teal:#00d4aa;--teal-dim:#00a884;--teal-glow:rgba(0,212,170,.12);
+  --blue:#3b82f6;--purple:#8b5cf6;--red:#f43f5e;--yellow:#fbbf24;--green:#22c55e;
+  --white:#ffffff;--gray:#8b99b0;
+  --font:'Inter',-apple-system,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--white);min-height:100vh}
+nav{
+  position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:66px;background:rgba(5,13,26,.9);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1rem;letter-spacing:-.02em;text-decoration:none;color:inherit}
+.brand-dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:pd 2.5s infinite}
+@keyframes pd{0%,100%{box-shadow:0 0 6px var(--teal)}50%{box-shadow:0 0 18px var(--teal)}}
+.nav-actions{display:flex;gap:.75rem}
+.nav-btn{
+  background:transparent;color:var(--gray);font-weight:600;font-size:.875rem;
+  padding:.5rem 1rem;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;
+  font-family:var(--font);transition:all .2s;
+}
+.nav-btn:hover{border-color:var(--teal);color:var(--teal)}
+.nav-btn.primary{background:var(--teal);color:#050d1a;border-color:var(--teal)}
+.nav-btn.primary:hover{background:#00f2c0}
+
+/* Hero header */
+.result-hero{
+  background:linear-gradient(160deg,#071224 0%,#0b1a2e 60%,#071224 100%);
+  border-bottom:1px solid var(--border);padding:3.5rem 2rem;text-align:center;
+  position:relative;overflow:hidden;
+}
+.result-hero::before{
+  content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);
+  width:600px;height:300px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(0,212,170,.07),transparent 70%);
+}
+.greeting{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:.5rem}
+.result-hero h1{font-size:2.4rem;font-weight:900;letter-spacing:-.04em;margin-bottom:.5rem}
+.result-hero .sub{color:var(--gray);font-size:.93rem;margin-bottom:1.75rem}
+.risk-pill{
+  display:inline-flex;align-items:center;gap:.65rem;
+  padding:.7rem 2rem;border-radius:50px;font-weight:700;font-size:1.05rem;
+}
+.risk-pill.high{background:rgba(244,63,94,.12);border:2px solid rgba(244,63,94,.4);color:#fb7185}
+.risk-pill.low{background:rgba(0,212,170,.1);border:2px solid rgba(0,212,170,.35);color:var(--teal)}
+.pill-dot{width:10px;height:10px;border-radius:50%}
+.risk-pill.high .pill-dot{background:#f43f5e;box-shadow:0 0 8px #f43f5e}
+.risk-pill.low  .pill-dot{background:var(--teal);box-shadow:0 0 8px var(--teal)}
+
+/* Body */
+.body-wrap{max-width:1040px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.75rem;margin-bottom:1.5rem}
+.card-title{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.card-title::after{content:'';flex:1;height:1px;background:var(--surface2)}
+
+/* Score + gauge row */
+.score-row{display:grid;grid-template-columns:1fr 260px;gap:2rem;align-items:center}
+.score-num{font-size:4.5rem;font-weight:900;letter-spacing:-.06em;line-height:1}
+.score-num.high{color:var(--red)}
+.score-num.low{color:var(--teal)}
+.score-label{font-size:.85rem;color:var(--gray);margin-top:.5rem;max-width:320px;line-height:1.65}
+
+/* Metrics grid */
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.m-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.3rem}
+.m-icon{font-size:1.5rem;margin-bottom:.5rem}
+.m-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);font-weight:700}
+.m-val{font-size:1.55rem;font-weight:800;margin:.25rem 0}
+.badge{font-size:.75rem;font-weight:700;padding:.22rem .65rem;border-radius:20px;display:inline-block}
+.b-ok{background:rgba(34,197,94,.12);color:var(--green)}
+.b-warn{background:rgba(251,191,36,.12);color:var(--yellow)}
+.b-bad{background:rgba(244,63,94,.12);color:var(--red)}
+
+/* Charts grid */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.75rem}
+.chart-card canvas{max-height:280px}
+
+/* Factors */
+.factor-row{display:flex;align-items:center;justify-content:space-between;padding:.8rem 0;border-bottom:1px solid var(--surface2)}
+.factor-row:last-child{border-bottom:none}
+.factor-left{display:flex;align-items:center;gap:.75rem}
+.f-ico{width:36px;height:36px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.f-name{font-weight:600;font-size:.92rem}
+.f-sub{font-size:.76rem;color:var(--gray)}
+
+/* Suggestions */
+.sug-card{background:var(--surface2);border-radius:14px;padding:1rem 1.25rem;margin-bottom:.75rem;display:flex;gap:.9rem;align-items:flex-start;border-left:3px solid var(--teal)}
+.sug-card.warn{border-left-color:var(--yellow)}
+.sug-card.danger{border-left-color:var(--red)}
+.sug-ico{font-size:1.3rem;flex-shrink:0;margin-top:.05rem}
+.sug-title{font-weight:700;font-size:.93rem;margin-bottom:.2rem}
+.sug-body{font-size:.83rem;color:var(--gray);line-height:1.6}
+
+/* Disclaimer */
+.disclaimer{background:rgba(139,153,176,.06);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;font-size:.8rem;color:var(--gray);line-height:1.6;margin-bottom:1.5rem}
+.disclaimer strong{color:var(--white)}
+
+/* Actions */
+.actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;padding-top:1rem}
+.act{padding:.8rem 1.75rem;border-radius:11px;cursor:pointer;font-family:var(--font);font-size:.9rem;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:.5rem}
+.act.primary{background:linear-gradient(135deg,var(--teal),var(--teal-dim));color:#050d1a;border:none}
+.act.primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,212,170,.3)}
+.act.outline{background:transparent;color:var(--white);border:1.5px solid var(--border)}
+.act.outline:hover{border-color:var(--teal);color:var(--teal)}
+
+/* No-data fallback */
+#no-data{display:none;text-align:center;padding:6rem 2rem;color:var(--gray)}
+#no-data a{color:var(--teal);text-decoration:none;font-weight:700}
+
+@media(max-width:768px){
+  .score-row{grid-template-columns:1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .result-hero h1{font-size:1.8rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="/"><div class="brand-dot"></div>HealthRisk AI</a>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="location.href='/'">🏠 Home</button>
+    <button class="nav-btn" onclick="window.print()">🖨 Print</button>
+    <button class="nav-btn primary" onclick="location.href='/form'">↺ New Assessment</button>
+  </div>
+</nav>
+
+<!-- No data fallback -->
+<div id="no-data">
+  <p style="font-size:1.1rem;margin-bottom:1rem">No results found. Please complete the assessment first.</p>
+  <a href="/form">← Go to Assessment Form</a>
+</div>
+
+<!-- Result content (hidden until JS populates) -->
+<div id="result-content" style="display:none">
+
+  <!-- Hero -->
+  <div class="result-hero">
+    <div class="greeting" id="r-greeting">Assessment Complete</div>
+    <h1 id="r-name">Your Health Risk Report</h1>
+    <p class="sub" id="r-date"></p>
+    <div class="risk-pill" id="r-pill">
+      <div class="pill-dot"></div>
+      <span id="r-pill-text">—</span>
+    </div>
+  </div>
+
+  <div class="body-wrap">
+
+    <!-- Score + Gauge -->
+    <div class="card">
+      <div class="card-title">📊 Overall Risk Score</div>
+      <div class="score-row">
+        <div>
+          <div class="score-num" id="r-score">—</div>
+          <div class="score-label" id="r-score-desc">—</div>
+        </div>
+        <div>
+          <canvas id="gaugeChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid" id="r-metrics"></div>
+
+    <!-- Charts: Radar + Bar -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="card-title">🕸 Health Factor Radar</div>
+        <canvas id="radarChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-title">📊 Risk Contribution by Factor</div>
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Factor Breakdown -->
+    <div class="card">
+      <div class="card-title">🔍 Factor Breakdown</div>
+      <div id="r-factors"></div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="card">
+      <div class="card-title">💡 Personalised Recommendations</div>
+      <div id="r-suggestions"></div>
+    </div>
+
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> Recommendations are based solely on modifiable lifestyle factors.
+      Non-modifiable factors (age, marital status, profession) inform the prediction but do not generate recommendations.
+      This tool is <strong>not</strong> a substitute for professional medical advice.
+    </div>
+
+    <div class="actions">
+      <button class="act primary" onclick="location.href='/form'">↺ New Assessment</button>
+      <button class="act outline" onclick="location.href='/'">🏠 Return Home</button>
+      <button class="act outline" onclick="window.print()">🖨 Print Report</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Load data ─────────────────────────────────────────────────────────────
+const raw = sessionStorage.getItem('hrp_result');
+if (!raw) {
+  document.getElementById('no-data').style.display = 'block';
+} else {
+  document.getElementById('result-content').style.display = 'block';
+  render(JSON.parse(raw));
+}
+
+function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+
+function render(d){
+  const isHigh = d.label === 'high';
+  const score  = d.risk_score;
+  const fv     = d.feature_values;
+
+  // ── Header ──────────────────────────────────────────────────────────────
+  document.getElementById('r-greeting').textContent = `Hello, ${d.first_name} ${d.last_name}`;
+  document.getElementById('r-name').textContent     = 'Your Health Risk Report';
+  document.getElementById('r-date').textContent     = 'Generated on ' + new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  const pill = document.getElementById('r-pill');
+  pill.className = 'risk-pill ' + (isHigh?'high':'low');
+  document.getElementById('r-pill-text').textContent = isHigh ? '⚠ High Health Risk' : '✓ Low Health Risk';
+
+  // ── Score ────────────────────────────────────────────────────────────────
+  const sEl = document.getElementById('r-score');
+  sEl.textContent  = score + '%';
+  sEl.className    = 'score-num ' + (isHigh?'high':'low');
+  document.getElementById('r-score-desc').textContent = isHigh
+    ? `A score of ${score}% indicates elevated health risk. Review the recommendations below to reduce it.`
+    : `A score of ${score}% indicates low health risk. Keep maintaining your healthy lifestyle!`;
+
+  // ── Gauge (doughnut) ─────────────────────────────────────────────────────
+  const gaugeColor = score < 40 ? '#00d4aa' : score < 65 ? '#fbbf24' : '#f43f5e';
+  new Chart(document.getElementById('gaugeChart'), {
+    type: 'doughnut',
+    data: {
+      datasets:[{
+        data: [score, 100-score],
+        backgroundColor: [gaugeColor,'#111f36'],
+        borderColor: ['transparent','transparent'],
+        borderRadius: 6,
+        circumference: 270,
+        rotation: -135,
+      }]
+    },
+    options:{
+      cutout:'78%',plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false},
+      },
+      animation:{animateRotate:true,duration:1200}
+    },
+    plugins:[{
+      id:'gaugeLabel',
+      afterDraw(chart){
+        const {ctx,chartArea:{width,height,top}}=chart;
+        ctx.save();
+        ctx.textAlign='center';
+        ctx.fillStyle=gaugeColor;
+        ctx.font='bold 32px Inter,sans-serif';
+        ctx.fillText(score+'%', width/2, top+height*.56);
+        ctx.fillStyle='#8b99b0';
+        ctx.font='600 13px Inter,sans-serif';
+        ctx.fillText('Risk Score', width/2, top+height*.72);
+        ctx.restore();
+      }
+    }]
+  });
+
+  // ── BMI / Sleep / Exercise classify ─────────────────────────────────────
+  const bmi = fv.bmi;
+  let bmiCat,bmiSt;
+  if(bmi<18.5){bmiCat='Underweight';bmiSt='warn';}
+  else if(bmi<25){bmiCat='Normal';bmiSt='ok';}
+  else if(bmi<30){bmiCat='Overweight';bmiSt='warn';}
+  else{bmiCat='Obese';bmiSt='bad';}
+
+  const sl=fv.sleep;
+  const slSt=sl>=7&&sl<=9?'ok':sl>=6?'warn':'bad';
+  const exSt={none:'bad',low:'warn',medium:'ok',high:'ok'}[fv.exercise]||'warn';
+
+  // ── Metrics cards ─────────────────────────────────────────────────────────
+  const metrics=[
+    {icon:'⚖️',label:'BMI',val:bmi,badge:bmiCat,st:bmiSt},
+    {icon:'😴',label:'Sleep',val:sl+'h',badge:sl>=7&&sl<=9?'Optimal':sl>=6?'Fair':'Low',st:slSt},
+    {icon:'🏃',label:'Exercise',val:cap(fv.exercise),badge:exSt==='ok'?'Active':exSt==='warn'?'Light':'Inactive',st:exSt},
+    {icon:'🍬',label:'Sugar',val:cap(fv.sugar_intake),badge:cap(fv.sugar_intake),st:fv.sugar_intake==='low'?'ok':fv.sugar_intake==='medium'?'warn':'bad'},
+    {icon:'🚬',label:'Smoking',val:cap(fv.smoking),badge:fv.smoking==='no'?'None':'Active',st:fv.smoking==='no'?'ok':'bad'},
+    {icon:'🍺',label:'Alcohol',val:cap(fv.alcohol),badge:fv.alcohol==='no'?'None':'Yes',st:fv.alcohol==='no'?'ok':'bad'},
+  ];
+  document.getElementById('r-metrics').innerHTML = metrics.map(m=>`
+    <div class="m-card">
+      <div class="m-icon">${m.icon}</div>
+      <div class="m-label">${m.label}</div>
+      <div class="m-val">${m.val}</div>
+      <span class="badge b-${m.st}">${m.badge}</span>
+    </div>`).join('');
+
+  // ── Radar chart ───────────────────────────────────────────────────────────
+  // Score each factor 0–100 (higher = healthier)
+  const exScore  = {none:10,low:35,medium:75,high:100}[fv.exercise]||35;
+  const sugScore = {low:100,medium:60,high:20}[fv.sugar_intake]||60;
+  const sleepScore= sl>=7&&sl<=9?100:sl>=6?60:20;
+  let bmiScore=100;
+  if(bmi<18.5)bmiScore=55; else if(bmi<25)bmiScore=100; else if(bmi<30)bmiScore=55; else bmiScore=20;
+  const smokScore=fv.smoking==='no'?100:10;
+  const alcScore =fv.alcohol==='no'?100:45;
+
+  new Chart(document.getElementById('radarChart'),{
+    type:'radar',
+    data:{
+      labels:['Exercise','Sleep','BMI','Sugar','Smoking','Alcohol'],
+      datasets:[{
+        label:'Your Score',
+        data:[exScore,sleepScore,bmiScore,sugScore,smokScore,alcScore],
+        backgroundColor:'rgba(0,212,170,.12)',
+        borderColor:'#00d4aa',
+        pointBackgroundColor:'#00d4aa',
+        pointRadius:5,
+        borderWidth:2,
+      }]
+    },
+    options:{
+      scales:{r:{
+        min:0,max:100,
+        ticks:{display:false},
+        grid:{color:'rgba(99,179,237,.1)'},
+        pointLabels:{color:'#8b99b0',font:{size:12,family:'Inter'}},
+        angleLines:{color:'rgba(99,179,237,.08)'},
+      }},
+      plugins:{legend:{display:false},tooltip:{enabled:true}},
+      animation:{duration:1000}
+    }
+  });
+
+  // ── Bar chart (risk contribution) ─────────────────────────────────────────
+  // Invert: higher bar = more risk
+  const riskContrib = [
+    100-bmiScore, 100-sleepScore, 100-exScore, 100-sugScore,
+    100-smokScore, 100-alcScore
+  ];
+  const barColors = riskContrib.map(v=>
+    v<30?'rgba(34,197,94,.7)':v<60?'rgba(251,191,36,.75)':'rgba(244,63,94,.75)'
+  );
+  new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{
+      labels:['BMI','Sleep','Exercise','Sugar','Smoking','Alcohol'],
+      datasets:[{
+        label:'Risk Contribution %',
+        data: riskContrib,
+        backgroundColor: barColors,
+        borderRadius:8,
+        borderSkipped:false,
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      scales:{
+        x:{min:0,max:100,grid:{color:'rgba(99,179,237,.08)'},ticks:{color:'#8b99b0',font:{family:'Inter'}},border:{display:false}},
+        y:{grid:{display:false},ticks:{color:'#8b99b0',font:{family:'Inter',size:12}},border:{display:false}}
+      },
+      plugins:{legend:{display:false}},
+      animation:{duration:900}
+    }
+  });
+
+  // ── Factor breakdown ────────────────────────────────────────────────────
+  const factors=[
+    {ico:'⚖️',name:'BMI',val:bmi,sub:bmiCat,st:bmiSt},
+    {ico:'😴',name:'Sleep',val:sl+' hrs/night',sub:'Per night',st:slSt},
+    {ico:'🏃',name:'Exercise',val:cap(fv.exercise),sub:'Activity level',st:exSt},
+    {ico:'🍬',name:'Sugar Intake',val:cap(fv.sugar_intake),sub:'Daily intake',st:fv.sugar_intake==='low'?'ok':fv.sugar_intake==='medium'?'warn':'bad'},
+    {ico:'🚬',name:'Smoking',val:cap(fv.smoking),sub:'',st:fv.smoking==='no'?'ok':'bad'},
+    {ico:'🍺',name:'Alcohol',val:cap(fv.alcohol),sub:'',st:fv.alcohol==='no'?'ok':'bad'},
+  ];
+  document.getElementById('r-factors').innerHTML=factors.map(f=>`
+    <div class="factor-row">
+      <div class="factor-left">
+        <div class="f-ico">${f.ico}</div>
+        <div><div class="f-name">${f.name}</div>${f.sub?`<div class="f-sub">${f.sub}</div>`:''}</div>
+      </div>
+      <span class="badge b-${f.st}">${f.val}</span>
+    </div>`).join('');
+
+  // ── Suggestions ──────────────────────────────────────────────────────────
+  const sugs=[];
+  if(!isHigh){
+    sugs.push({ico:'✅',title:'Great work — keep it up!',body:'Your lifestyle factors are looking healthy. Maintain your routine, stay active, and schedule regular check-ups.',cls:''});
+  } else {
+    if(bmi<18.5) sugs.push({ico:'🥗',title:'Increase Caloric Intake',body:'Your BMI suggests underweight. Focus on nutrient-dense foods and consult a dietitian.',cls:'warn'});
+    else if(bmi>=25&&bmi<30) sugs.push({ico:'🏋️',title:'Manage Your Weight',body:'Overweight BMI increases health risks. Aim for 30 min moderate exercise most days and adjust your diet.',cls:'warn'});
+    else if(bmi>=30) sugs.push({ico:'⚕️',title:'Address Obesity',body:'Your BMI indicates obesity. Consult a healthcare professional for a personalised weight-management plan.',cls:'danger'});
+
+    if(sl<7) sugs.push({ico:'😴',title:'Improve Sleep Duration',body:`You're sleeping ${sl}h. Adults need 7–9 hours. Establish a consistent schedule and reduce screen time before bed.`,cls:'warn'});
+    else if(sl>9) sugs.push({ico:'🌙',title:'Regulate Sleep',body:'Sleeping over 9 hours may indicate underlying health issues. Consult a doctor if you feel persistently fatigued.',cls:'warn'});
+
+    if(fv.exercise==='none') sugs.push({ico:'🚶',title:'Start Moving',body:'No exercise is a major risk factor. Start with 15-min walks daily and gradually increase.',cls:'danger'});
+    else if(fv.exercise==='low') sugs.push({ico:'🏃',title:'Increase Activity Level',body:'Aim for at least 150 minutes of moderate aerobic activity per week.',cls:'warn'});
+
+    if(fv.sugar_intake==='high') sugs.push({ico:'🍬',title:'Reduce Sugar Intake',body:'High sugar is linked to diabetes and cardiovascular disease. Swap sugary drinks for water.',cls:'danger'});
+    else if(fv.sugar_intake==='medium') sugs.push({ico:'🍎',title:'Monitor Sugar Consumption',body:'Consider reducing added sugars by choosing whole fruits and reading nutrition labels.',cls:'warn'});
+
+    if(fv.smoking==='yes') sugs.push({ico:'🚭',title:'Quit Smoking',body:'Smoking significantly increases risk of heart disease, cancer and respiratory illness.',cls:'danger'});
+    if(fv.alcohol==='yes') sugs.push({ico:'🚫',title:'Reduce Alcohol Consumption',body:'Regular alcohol raises blood pressure and liver disease risk. Aim for alcohol-free days each week.',cls:'warn'});
+
+    if(sugs.length===0) sugs.push({ico:'⚕️',title:'Consult a Healthcare Professional',body:'Non-modifiable factors may be contributing to your risk. Please see a doctor for a full evaluation.',cls:'warn'});
+  }
+  document.getElementById('r-suggestions').innerHTML=sugs.map(s=>`
+    <div class="sug-card ${s.cls}">
+      <div class="sug-ico">${s.ico}</div>
+      <div><div class="sug-title">${s.title}</div><div class="sug-body">${s.body}</div></div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
